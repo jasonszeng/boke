@@ -1,0 +1,501 @@
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>拼写测试</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            padding: 20px;
+        }
+
+        .corner-icon {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 60px;
+            height: 60px;
+            cursor: pointer;
+            transition: transform 0.3s ease, filter 0.3s ease;
+            z-index: 1000;
+            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
+        }
+
+        .corner-icon:hover {
+            transform: scale(1.1) rotate(-5deg);
+            filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.5));
+        }
+
+        .container {
+            max-width: 600px;
+            width: 90%;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+            border-radius: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3),
+                        inset 0 2px 4px rgba(255, 255, 255, 0.05);
+            text-align: center;
+            transform-style: preserve-3d;
+            perspective: 1000px;
+            animation: container-appear 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        @keyframes container-appear {
+            from {
+                opacity: 0;
+                transform: translateY(50px) rotateX(-10deg);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) rotateX(0);
+            }
+        }
+
+        h1 {
+            color: #fff;
+            margin-bottom: 35px;
+            font-size: 2.5em;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            animation: title-glow 3s ease-in-out infinite alternate;
+            letter-spacing: 3px;
+            background: linear-gradient(45deg, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        @keyframes title-glow {
+            from {
+                text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            }
+            to {
+                text-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
+            }
+        }
+
+        #word-meaning {
+            display: inline-block;
+            font-size: 2em;
+            font-weight: 600;
+            color: #e2e8f0;
+            padding: 15px 30px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            animation: pulse 2.5s infinite;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2),
+                        inset 0 2px 4px rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            margin: 25px 0;
+            letter-spacing: 1px;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+
+        #user-input {
+            width: 85%;
+            padding: 20px;
+            margin: 25px 0;
+            border: 2px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            font-size: 1.2em;
+            outline: none;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        #user-input:focus {
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 30px rgba(148, 163, 184, 0.2);
+            transform: translateY(-3px);
+            border-color: rgba(148, 163, 184, 0.3);
+        }
+
+        #user-input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        #user-input:focus::placeholder {
+            opacity: 0.7;
+            transform: translateY(-20px);
+            font-size: 0.8em;
+        }
+
+        button {
+            background: linear-gradient(45deg, #3b82f6, #0ea5e9);
+            color: #fff;
+            border: none;
+            border-radius: 20px;
+            padding: 18px 45px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 15px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 1.5px;
+        }
+
+        button:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+            background: linear-gradient(45deg, #0ea5e9, #3b82f6);
+        }
+
+        button:active {
+            transform: translateY(-2px);
+        }
+
+        .result {
+            margin-top: 25px;
+            font-weight: 600;
+            font-size: 1.2em;
+            min-height: 30px;
+            animation: fade-in 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 15px;
+            border-radius: 15px;
+            letter-spacing: 0.5px;
+        }
+
+        .correct {
+            color: #34d399;
+            animation: correct-answer 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(52, 211, 153, 0.1);
+            border: 1px solid rgba(52, 211, 153, 0.2);
+            box-shadow: 0 0 20px rgba(52, 211, 153, 0.1);
+        }
+
+        .wrong {
+            color: #f87171;
+            animation: wrong-answer 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(248, 113, 113, 0.1);
+            border: 1px solid rgba(248, 113, 113, 0.2);
+            box-shadow: 0 0 20px rgba(248, 113, 113, 0.1);
+        }
+
+        @keyframes wrong-answer {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
+        }
+
+        @keyframes correct-answer {
+            0% { transform: scale(0.95); opacity: 0; }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .progress-bar {
+            width: 85%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+            margin: 30px auto;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #0ea5e9);
+            width: 0%;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.2),
+                transparent
+            );
+            animation: progress-shine 1.5s infinite;
+        }
+
+        /* 新增提示按钮样式 */
+        #hint-button {
+            background: linear-gradient(45deg, #9333ea, #7c3aed);
+            margin-left: 10px;
+        }
+
+        #hint-button:hover {
+            background: linear-gradient(45deg, #7c3aed, #9333ea);
+            box-shadow: 0 8px 25px rgba(124, 58, 237, 0.4);
+        }
+
+        /* 新增重试按钮样式 */
+        #retry-button {
+            background: linear-gradient(45deg, #f59e0b, #f97316);
+            margin-left: 10px;
+        }
+
+        #retry-button:hover {
+            background: linear-gradient(45deg, #f97316, #f59e0b);
+            box-shadow: 0 8px 25px rgba(249, 115, 22, 0.4);
+        }
+
+        #hint {
+            color: #94a3b8;
+            font-size: 1.1em;
+            margin-top: 15px;
+            min-height: 24px;
+            animation: fade-in 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes progress-shine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 20px;
+                width: 95%;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            #word-meaning {
+                font-size: 1.5em;
+            }
+
+            button {
+                padding: 15px 35px;
+                font-size: 1em;
+            }
+
+            #user-input {
+                font-size: 1em;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <img src="https://i.postimg.cc/xCn08PwM/image-removebg-preview.png" 
+         class="corner-icon" 
+         onclick="window.open('https://c.hopto.org/word/establish.html ', '_blank')"
+         alt="单词图标">
+         
+    <div class="container">
+        <h1>拼写测试</h1>
+        <div class="progress-bar">
+            <div class="progress" id="progress"></div>
+        </div>
+        <div id="word-meaning"></div>
+        <input type="text" id="user-input" placeholder="请输入单词" autocomplete="off" />
+        <div>
+            <button id="action-button" onclick="checkAnswer()">提交</button>
+            <button id="hint-button" onclick="showHint()">提示</button>
+            <button id="retry-button" onclick="retryWord()" style="display: none;">重试</button>
+        </div>
+        <p class="result" id="result"></p>
+        <p id="hint"></p>
+    </div>
+
+    <script>
+        const words = [
+    { "chinese": "信仰", "english": "faiths" },
+    { "chinese": "上诉", "english": "appeal" },
+    { "chinese": "惊叹", "english": "marveled" },
+    { "chinese": "繁荣", "english": "prosperity" },
+    { "chinese": "稀有的", "english": "rare" },
+    { "chinese": "民主", "english": "democracy" },
+    { "chinese": "宾夕法尼亚", "english": "Pennsylvania" },
+    { "chinese": "费城", "english": "Philadelphia" },
+    { "chinese": "乞丐", "english": "beggar" },
+    { "chinese": "妒忌", "english": "jealousy" }
+        ];
+        
+        let currentWordIndex = 0;
+        let correctAnswers = 0;
+        let hintCount = 0;
+
+        function getGrade(score, total) {
+            const percentage = (score / total) * 100;
+            if (percentage >= 90) return 'A';
+            if (percentage >= 80) return 'B';
+            if (percentage >= 70) return 'C';
+            if (percentage >= 60) return 'D';
+            return 'F';
+        }
+
+        function updateProgress() {
+            const progress = (currentWordIndex / words.length) * 100;
+            document.getElementById("progress").style.width = `${progress}%`;
+        }
+
+        function displayWord() {
+            const currentWord = words[currentWordIndex];
+            document.getElementById("word-meaning").innerText = currentWord.chinese;
+            document.getElementById("user-input").value = "";
+            document.getElementById("result").innerText = "";
+            document.getElementById("hint").innerText = "";
+            document.getElementById("result").className = "result";
+            document.getElementById("action-button").innerText = "提交";
+            document.getElementById("action-button").onclick = checkAnswer;
+            document.getElementById("retry-button").style.display = "none";
+            document.getElementById("user-input").focus();
+            hintCount = 0;
+            updateProgress();
+        }
+
+        function showHint() {
+            const currentWord = words[currentWordIndex];
+            const hintElement = document.getElementById("hint");
+            hintCount++;
+            
+            if (hintCount === 1) {
+                // 显示第一个字母
+                hintElement.innerText = `提示: 第一个字母是 "${currentWord.english[0]}"`;
+            } else if (hintCount === 2) {
+                // 显示长度和首尾字母
+                hintElement.innerText = `提示: 单词长度为 ${currentWord.english.length} 个字母，首字母是 "${currentWord.english[0]}"，尾字母是 "${currentWord.english[currentWord.english.length-1]}"`;
+            } else {
+                // 显示带星号的完整单词
+                let maskedWord = currentWord.english.split('').map((letter, index) => {
+                    if (index === 0 || index === currentWord.english.length - 1 || index % 2 === 0) {
+                        return letter;
+                    }
+                    return '*';
+                }).join('');
+                hintElement.innerText = `提示: ${maskedWord}`;
+            }
+        }
+
+        function checkAnswer() {
+            const userInput = document.getElementById("user-input").value.trim().toLowerCase();
+            const resultElement = document.getElementById("result");
+            const currentWord = words[currentWordIndex];
+            
+            if (userInput === "") {
+                resultElement.innerText = "请输入单词";
+                resultElement.className = "result wrong";
+                document.getElementById("user-input").style.borderColor = "#f87171";
+                setTimeout(() => {
+                    document.getElementById("user-input").style.borderColor = "rgba(255, 255, 255, 0.08)";
+                }, 1000);
+                return;
+            }
+            
+            if (userInput === currentWord.english.toLowerCase()) {
+                resultElement.innerText = "正确!";
+                resultElement.className = "result correct";
+                correctAnswers++;
+                document.getElementById("action-button").innerText = "下一个";
+                document.getElementById("action-button").onclick = nextWord;
+                document.getElementById("retry-button").style.display = "none";
+            } else {
+                resultElement.innerText = `错误。正确答案是: ${currentWord.english}`;
+                resultElement.className = "result wrong";
+                document.getElementById("user-input").style.animation = "wrong-answer 0.6s";
+                document.getElementById("retry-button").style.display = "inline-block";
+                document.getElementById("action-button").innerText = "下一个";
+                document.getElementById("action-button").onclick = nextWord;
+                setTimeout(() => {
+                    document.getElementById("user-input").style.animation = "";
+                }, 600);
+            }
+        }
+
+        function retryWord() {
+            document.getElementById("user-input").value = "";
+            document.getElementById("result").innerText = "";
+            document.getElementById("hint").innerText = "";
+            document.getElementById("action-button").innerText = "提交";
+            document.getElementById("action-button").onclick = checkAnswer;
+            document.getElementById("retry-button").style.display = "none";
+            document.getElementById("user-input").focus();
+            hintCount = 0;
+        }
+
+        function nextWord() {
+            if (currentWordIndex < words.length - 1) {
+                currentWordIndex++;
+                displayWord();
+            } else {
+                showFinalScore();
+            }
+        }
+
+        function showFinalScore() {
+            const container = document.querySelector('.container');
+            const grade = getGrade(correctAnswers, words.length);
+            container.innerHTML = `
+                <h1>完成!</h1>
+                <p style="font-size: 24px; margin: 20px 0;">
+                    得分: ${correctAnswers}/${words.length}
+                </p>
+                <p style="font-size: 36px; margin: 20px 0; color: ${grade === 'F' ? '#f87171' : '#34d399'};">
+                    等级: ${grade}
+                </p>
+                <button onclick="restartTest()">重新开始</button>
+            `;
+        }
+
+        function restartTest() {
+            currentWordIndex = 0;
+            correctAnswers = 0;
+            location.reload();
+        }
+
+        document.getElementById("user-input").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                if (document.getElementById("action-button").innerText === "提交") {
+                    checkAnswer();
+                } else {
+                    nextWord();
+                }
+            }
+        });
+
+        displayWord();
+    </script>
+</body>
+</html>
+
+
